@@ -1,0 +1,14 @@
+{
+  "name": "clone-counter",
+  "version": "1.0.0",
+  "description": "GitHub API clone counter.",
+  "main": "cloneCounter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dan Wahlin",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/rest": "^18.12.0"
+  }
+}
