@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "get-stats": "node ./getStats.js",
     "build": "tsc",
     "watch": "tsc -w",
     "prestart": "npm run build",

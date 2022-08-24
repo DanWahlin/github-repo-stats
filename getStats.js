@@ -3,7 +3,7 @@ const { Octokit } = require("@octokit/rest");
 let octokit;
 
 const ownersRepos = [
-    { owner: '<owner name>', repo: '<repo name>', token: '<token>'}
+    { owner: 'danwahlin', repo: 'angular-jumpstart', token: '<token>'}
 ];
 
 async function getCloneCount(ownerRepo) {
@@ -46,7 +46,7 @@ async function getPageViews(ownerRepo) {
     return 0;
 }
 
-async function init() {
+async function getStats() {
     const stats = [];
     for (const repo of ownersRepos) {
         octokit = new Octokit({
@@ -71,5 +71,5 @@ async function init() {
     console.log(stats);
 }
 
-init();
+getStats();
 
