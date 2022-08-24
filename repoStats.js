@@ -1,10 +1,9 @@
 const { Octokit } = require("@octokit/rest");
-const octokit = new Octokit({
-    auth: 'personal-access-token'
-});
+// Create personal access token (repo --> public rights) at https://github.com/settings/tokens
+let octokit;
 
 const ownersRepos = [
-     { owner: '', repo: ''}
+     { owner: '<repo owner>', repo: '<repo name>', token: '<token>'}
 ];
 
 async function getCloneCount(owner, repo) {
@@ -51,6 +50,9 @@ async function getPageViews(owner, repo) {
 }
 
 for (const ownerRepo of ownersRepos) {
+    octokit = new Octokit({
+        auth: ownerRepo.token
+    });
     getCloneCount(ownerRepo.owner, ownerRepo.repo);
     getForkCount(ownerRepo.owner, ownerRepo.repo);
     getPageViews(ownerRepo.owner, ownerRepo.repo);
