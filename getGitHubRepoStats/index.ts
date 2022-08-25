@@ -3,8 +3,10 @@ import { Octokit } from '@octokit/rest';
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a GitHub repo stats request.');
+    const stats = await getStats();
+    console.log("The stats", stats);
     context.res = {
-        body: getStats()
+        body: stats
     };
 };
 
@@ -12,8 +14,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 let octokit;
 
 const ownersRepos = [
-    { owner: 'danwahlin', repo: 'angular-jumpstart', token: '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' },
-    { owner: 'microsoft', repo: 'MicrosoftCloud', token: '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' }
+    { owner: 'danwahlin', repo: 'angular-jumpstart', token: '<token>' }
 ];
 
 async function getCloneCount(ownerRepo) {
@@ -78,7 +79,6 @@ async function getStats() {
         };
         stats.push(repoStats);
     }
-    console.log(stats);
     return stats;
 }
 
