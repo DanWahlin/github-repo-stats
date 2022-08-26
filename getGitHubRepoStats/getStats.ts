@@ -1,15 +1,11 @@
-const { Octokit } = require("@octokit/rest");
+import { Octokit } from '@octokit/rest';
 
 // Create personal access token (with repo --> public rights) at https://github.com/settings/tokens
 let octokit;
 const ownersRepos = getRepos();
 
-getStats();
-
 function getRepos() {
     try {
-        // Need to set env variable GITHUB_REPOS
-        // export GITHUB_REPOS="[ { \"owner\": \"microsoft\", \"repo\": \"MicrosoftCloud\", \"token\": \"token_value\" } ]"
         return JSON.parse(process.env['GITHUB_REPOS']);
     }
     catch (e) {
@@ -17,7 +13,7 @@ function getRepos() {
     }
 }
 
-async function getStats() {
+export async function getStats() {
     const stats = [];
     for (const repo of ownersRepos) {
         octokit = new Octokit({
