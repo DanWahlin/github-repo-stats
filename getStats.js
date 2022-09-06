@@ -30,13 +30,18 @@ async function getStats() {
         const clones = await getCloneCount(ownerRepo);
         const forks = await getForkCount(ownerRepo);
         const views = await getPageViews(ownerRepo);
+        const today = new Date();
+        const fourteenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 14);
         const repoStats = {
+            startDate: fourteenDaysAgo,
+            endDate: today,
             owner: repo.owner,
             repo: repo.repo,
             clones,
             forks,
             views
         };
+        // console.log(repoStats);
         stats.push(repoStats);
     }
     return stats;
