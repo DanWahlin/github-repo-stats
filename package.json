@@ -10,10 +10,12 @@
     "start": "func start"
   },
   "dependencies": {
-    "@octokit/rest": "^19.0.4"
+    "@octokit/rest": "^19.0.4",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@azure/functions": "^3.0.0",
+    "@octokit/types": "^7.3.1",
     "@types/node": "16.x",
     "typescript": "^4.7.4"
   }

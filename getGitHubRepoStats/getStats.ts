@@ -1,7 +1,8 @@
 import { Octokit } from '@octokit/rest';
+import { v4 as uuidv4 } from 'uuid';
 
 // Create personal access token (with repo --> public rights) at https://github.com/settings/tokens
-let octokit;
+let octokit: Octokit;
 const ownersRepos = getRepos();
 
 function getRepos() {
@@ -23,31 +24,48 @@ export async function getStats() {
             owner: repo.owner,
             repo: repo.repo
         }
-        const clones = await getCloneCount(ownerRepo);
-        const forks = await getForkCount(ownerRepo);
+        const clones = await getClones(ownerRepo);
+        const forks = await getTotalForks(ownerRepo);
         const views = await getPageViews(ownerRepo);
-        const today = new Date();
-        const fourteenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 14);
-        const repoStats = {
-            startDate: fourteenDaysAgo,
-            endDate: today,
-            owner: repo.owner,
-            repo: repo.repo,
-            clones,
-            forks,
-            views
-        };
-        stats.push(repoStats);
+
+        const yesterdayRow = getTodayRow(ownerRepo, clones, forks, views);
+        stats.push(yesterdayRow);
     }
+
     return stats;
 }
 
-async function getCloneCount(ownerRepo) {
+function getTodayRow(ownerRepo, clones, forks, views) {
+    const today = new Date();
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+      .toISOString().split('T')[0] + 'T00:00:00Z';
+
+    const todayClonesViewsForks ={
+        id: uuidv4(),
+        timestamp: yesterday,
+        owner: ownerRepo.owner,
+        repo: ownerRepo.repo,
+        clones: 0,
+        forks: forks,
+        views: 0
+    };
+    const todayClones = clones.clones.find(c => c.timestamp === yesterday);
+    const todayViews = views.views.find(v => v.timestamp === yesterday);
+    if (todayClones) {
+        todayClonesViewsForks.clones = todayClones.count;
+    }
+    if (todayViews) {
+        todayClonesViewsForks.views = todayViews.count;
+    }
+    return todayClonesViewsForks;
+}
+
+async function getClones(ownerRepo) {
     try {
         // https://docs.github.com/en/rest/metrics/traffic#get-repository-clones
         const { data } = await octokit.rest.repos.getClones(ownerRepo);
         console.log(`${ownerRepo.owner}/${ownerRepo.repo} clones:`, data.count);
-        return data.count;
+        return data;
     }
     catch (e) {
         console.log(`Unable to get clones for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
@@ -55,14 +73,16 @@ async function getCloneCount(ownerRepo) {
     return 0;
 }
 
-async function getForkCount(ownerRepo) {
+async function getTotalForks(ownerRepo) {
     try {
         // https://docs.github.com/en/rest/repos/forks
-        const { data } = await octokit.rest.repos.listForks(ownerRepo);
-        console.log(`${ownerRepo.owner}/${ownerRepo.repo} forks:`, (data && data.length) ? data.length : 0);
-        return (data && data.length) ? data.length : 0;
+        const { data } = await octokit.rest.repos.get(ownerRepo);
+        const forksCount = (data) ? data.forks_count : 0;
+        console.log(`${ownerRepo.owner}/${ownerRepo.repo} forks:`, forksCount);
+        return forksCount
     }
     catch (e) {
+        console.log(e);
         console.log(`Unable to get forks for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
     }
     return 0;
@@ -71,9 +91,9 @@ async function getForkCount(ownerRepo) {
 async function getPageViews(ownerRepo) {
     try {
         // https://docs.github.com/en/rest/metrics/traffic#get-page-views
-        const { data } = await octokit.request('GET /repos/{owner}/{repo}/traffic/views', ownerRepo);
+        const { data } = await await octokit.rest.repos.getViews(ownerRepo);
         console.log(`${ownerRepo.owner}/${ownerRepo.repo} visits:`, data.count);
-        return data.count;
+        return data;
     }
     catch (e) {
         console.log(`Unable to get page views for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
