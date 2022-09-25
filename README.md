@@ -19,6 +19,11 @@
 
 ## Deploying to Azure Functions
 
-1. Add the `GITHUB_REPOS` value (see example above) into your key vault as a secret (named `github-repos`).
+1. Add the `GITHUB_REPOS` value (see example below) into your key vault as a secret (named `github-repos`).
+
+    ```json
+    [ { "owner": "microsoft", "repo": "MicrosoftCloud", "token": "TOKEN_VALUE" }, { "owner": "microsoft", "repo": "brainstorm-fluidframework-m365-azure", "token": "TOKEN_VALUE" } ]
+    ```
+
 1. Select the command pallet's `Azure Functions: Deploy to Function App` option.
 1. Note that if the key vault `GITHUB_REPOS` value is updated, you may need to go into the function configuration in the portal and remove (or add it if it's not there) the last `/`. Otherwise, the function may cache the key vault value even after it is restarted.
