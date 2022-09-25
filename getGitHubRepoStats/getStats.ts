@@ -3,20 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Create personal access token (with repo --> public rights) at https://github.com/settings/tokens
 let octokit: Octokit;
-const ownersRepos = getRepos();
+let ownersRepos;
+let context;
 
-function getRepos() {
-    try {
-        const repos = JSON.parse(process.env['GITHUB_REPOS']);
-        console.log('Repos:', repos);
-        return repos;
-    }
-    catch (e) {
-        return [];
-    }
-}
-
-export async function getStats() {
+export async function getStats(ctx) {
+    context = ctx || { log: console.log };
+    ownersRepos = getRepos();
     const stats = [];
     for (const repo of ownersRepos) {
         octokit = new Octokit({
@@ -35,6 +27,18 @@ export async function getStats() {
     }
 
     return stats;
+}
+
+function getRepos() {
+    try {
+        const repos = JSON.parse(process.env['GITHUB_REPOS']);
+        context.log('Repos:', repos);
+        return repos;
+    }
+    catch (e) {
+        context.log(e);
+        return [];
+    }
 }
 
 function getTodayRow(ownerRepo, clones, forks, views) {
@@ -66,11 +70,11 @@ async function getClones(ownerRepo) {
     try {
         // https://docs.github.com/en/rest/metrics/traffic#get-repository-clones
         const { data } = await octokit.rest.repos.getClones(ownerRepo);
-        console.log(`${ownerRepo.owner}/${ownerRepo.repo} clones:`, data.count);
+        context.log(`${ownerRepo.owner}/${ownerRepo.repo} clones:`, data.count);
         return data;
     }
     catch (e) {
-        console.log(`Unable to get clones for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
+        context.log(`Unable to get clones for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
     }
     return 0;
 }
@@ -80,12 +84,12 @@ async function getTotalForks(ownerRepo) {
         // https://docs.github.com/en/rest/repos/forks
         const { data } = await octokit.rest.repos.get(ownerRepo);
         const forksCount = (data) ? data.forks_count : 0;
-        console.log(`${ownerRepo.owner}/${ownerRepo.repo} forks:`, forksCount);
+        context.log(`${ownerRepo.owner}/${ownerRepo.repo} forks:`, forksCount);
         return forksCount
     }
     catch (e) {
-        console.log(e);
-        console.log(`Unable to get forks for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
+        context.log(e);
+        context.log(`Unable to get forks for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
     }
     return 0;
 }
@@ -94,12 +98,12 @@ async function getPageViews(ownerRepo) {
     try {
         // https://docs.github.com/en/rest/metrics/traffic#get-page-views
         const { data } = await await octokit.rest.repos.getViews(ownerRepo);
-        console.log(`${ownerRepo.owner}/${ownerRepo.repo} visits:`, data.count);
+        context.log(`${ownerRepo.owner}/${ownerRepo.repo} visits:`, data.count);
         return data;
     }
     catch (e) {
-        console.log(`Unable to get page views for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
-        console.log(e);
+        context.log(`Unable to get page views for ${ownerRepo.owner}/${ownerRepo.repo}. You probably don't have push access.`);
+        context.log(e);
     }
     return 0;
 }
