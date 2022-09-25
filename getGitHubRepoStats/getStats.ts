@@ -7,7 +7,9 @@ const ownersRepos = getRepos();
 
 function getRepos() {
     try {
-        return JSON.parse(process.env['GITHUB_REPOS']);
+        const repos = JSON.parse(process.env['GITHUB_REPOS']);
+        console.log('Repos:', repos);
+        return repos;
     }
     catch (e) {
         return [];

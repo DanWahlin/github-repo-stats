@@ -10,7 +10,9 @@ function getRepos() {
     try {
         // Need to set env variable GITHUB_REPOS
         // export GITHUB_REPOS="[ { \"owner\": \"microsoft\", \"repo\": \"MicrosoftCloud\", \"token\": \"token_value\" } ]"
-        return JSON.parse(process.env['GITHUB_REPOS']);
+        const repos = JSON.parse(process.env['GITHUB_REPOS']);
+        console.log('Repos:', repos);
+        return repos;
     }
     catch (e) {
         return [];
