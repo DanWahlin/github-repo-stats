@@ -1,5 +1,6 @@
 const { Octokit } = require("@octokit/rest");
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs').promises;
 
 // Create personal access token (with repo --> public rights) at https://github.com/settings/tokens
 let octokit;
@@ -9,7 +10,7 @@ getStats(context);
 
 async function getStats(ctx) {
     context = ctx || { log: console.log }; // Doing this to simulate what's it like in Azure Functions
-    ownersRepos = getRepos();
+    ownersRepos = await getRepos();
     context.log(ownersRepos);
     const stats = [];
     for (const repo of ownersRepos) {
@@ -31,12 +32,17 @@ async function getStats(ctx) {
     return stats;
 }
 
-function getRepos() {
+async function getRepos() {
     try {
         console.log(context);
-        // Need to set env variable GITHUB_REPOS
-        // export GITHUB_REPOS="[ { \"owner\": \"microsoft\", \"repo\": \"MicrosoftCloud\", \"token\": \"token_value\" } ]"
-        const repos = JSON.parse(process.env['GITHUB_REPOS']);
+        /* Will load a file such as this:
+        [
+            { owner: 'danwahlin', repo: 'angular-jumpstart', token: 'TOKEN_VALUE'},
+            { owner: 'microsoft', repo: 'MicrosoftCloud', token: 'TOKEN_VALUE'}
+        ];
+        */
+        const env = await fs.readFile('./.env.json', 'utf8');
+        const repos = JSON.parse(env);
         context.log('Repos:', repos);
         return repos;
     }
