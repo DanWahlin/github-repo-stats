@@ -22,11 +22,15 @@ async function getStats(ctx) {
             repo: repo.repo
         }
 
-        const clones = await getClones(ownerRepo);
-        const forks = await getTotalForks(ownerRepo);
-        const views = await getPageViews(ownerRepo);
-
-        stats.push(getTodayRow(ownerRepo, clones, forks, views));
+        try {
+            const clones = await getClones(ownerRepo);
+            const forks = await getTotalForks(ownerRepo);
+            const views = await getPageViews(ownerRepo);
+            stats.push(getTodayRow(ownerRepo, clones, forks, views));
+        }
+        catch (e) {
+            console.log('Error getting stats for ', ownerRepo, e);
+        }
     }
     context.log(stats);
     return stats;
